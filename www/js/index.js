@@ -1,49 +1,113 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
-var app = {
-    // Application Constructor
-    initialize: function() {
-        this.bindEvents();
-    },
-    // Bind Event Listeners
+    /*global $*/
+    'use strict';
+    // Wait for device API libraries to load
     //
-    // Bind any events that are required on startup. Common events are:
-    // 'load', 'deviceready', 'offline', and 'online'.
-    bindEvents: function() {
-        document.addEventListener('deviceready', this.onDeviceReady, false);
-    },
-    // deviceready Event Handler
+    //document.addEventListener('deviceready', onDeviceReady, false);
+    $(document).ready(onDeviceReady());
+    // device APIs are available
     //
-    // The scope of 'this' is the event. In order to call the 'receivedEvent'
-    // function, we must explicitly call 'app.receivedEvent(...);'
-    onDeviceReady: function() {
-        app.receivedEvent('deviceready');
-    },
-    // Update DOM on a Received Event
-    receivedEvent: function(id) {
-        var parentElement = document.getElementById(id);
-        var listeningElement = parentElement.querySelector('.listening');
-        var receivedElement = parentElement.querySelector('.received');
+    function onDeviceReady() {
+        navigator.geolocation.getCurrentPosition(onGeoSuccess, onError);
 
-        listeningElement.setAttribute('style', 'display:none;');
-        receivedElement.setAttribute('style', 'display:block;');
-
-        console.log('Received Event: ' + id);
     }
-};
+
+    function showSelectedValues() {
+        return($("input[name=MCC]:checked").map(
+            function() {
+                return this.value;
+            }).get().join(","));
+    }
+
+    function submitPost() {
+        $('#submit').html('please wait');
+        var mccString = showSelectedValues();
+        var lat = $('#latitude').html();
+        var lon = $('#longitude').html();
+        var dataStr = 'text=' + '' +
+            '&is=' + '' +
+            '&mcc=' + escape(mccString) +
+            '&bei=' + '' +
+            '&edl=' + '' +
+            '&lat=' + escape(lat) +
+            '&lon=' + escape(lon) +
+            '&distLat=' + escape(lat) +
+            '&distLon=' + escape(lon);
+
+        var url = 'https://www.visa.com/supplierlocator/rest/search/supplier/desktop?' + dataStr;
+        $('#results').html('loading ' + mccString);
+        $.ajax({
+            url: url,
+            method: 'POST',
+            success: function(data) {
+                var $results = $('#results');
+                var $lastItem = $results;
+                $results.html('');
+                // data.data[0].list.sort(function (a,b){
+                //     return b.distance - .distance;
+                // });
+                $.each(data.data[0].list, function(index, val) {
+                    var htmlString = '<div id="' + val.clientId + '">' +
+                        '<ul>';
+                    if ( val.websiteUrl.length > 0){
+                        htmlString += '<li><a href="http://' + val.websiteUrl + '"><strong>' + val.name + '</strong></a></li>';
+                    } else
+                    {
+                        htmlString += '<li><strong>' + val.name + '</strong></li>';
+                    }
+                        htmlString += '<li>' + val.industry + '</li>' +
+                        '<li>' + val.distance.toFixed(2) + ' miles </li>' +
+                        '<li>' + val.address1 + ' ' + val.address2 + '</li>' +
+                        '<li>' + val.city + ' , ' + val.state + ' ' + val.zipCode + '</li>' +
+                        '</ul></div>';
+                    $results.append(htmlString);
+                    $lastItem = $('#' + val.clientId);
+
+                });
+                $('#submit').html('submit');
+                //html(JSON.stringify(data.data[0].list));
+            },
+            error: function() {
+                alert('error');
+            }
+
+        });
+
+    };
+    // onSuccess Geolocation
+    //
+    function onGeoSuccess(position) {
+            //var element = document.getElementById('geolocation');
+
+            var url = 'https://maps.googleapis.com/maps/api/geocode/json?latlng=' +
+                position.coords.latitude +
+                ',' + position.coords.longitude +
+                '&key=AIzaSyCDilyBmwUej93Au_S8UkiqNfLos4vna8s';
+            $('#latitude').html(position.coords.latitude);
+            $('#longitude').html(position.coords.longitude);
+            $('#submit').html('');
+            $('#submit').html('Submit');
+           
+
+            $.ajax({
+                url: url,
+                success: function(data) {
+                    $('#formatted_address').html('Address ' + data.results[0].formatted_address);
+                    $('#submit').click(function() {
+                        submitPost();
+                    });
+                },
+                error: function(data) {
+                    alert('error' + data);
+                }
+
+            });
+
+        }
+        //
+
+    // onError Callback receives a PositionError object
+    //
+    function onError(error) {
+        alert('code: ' + error.code + '\n' +
+            'message: ' + error.message + '\n');
+    }

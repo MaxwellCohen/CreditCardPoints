@@ -1,0 +1,12 @@
+#submit {
+    width: 100%;
+    background: blue;
+    color: white;
+    text-align: center;
+}
+
+ul{
+    list-style-type: none;
+    padding:0;
+    margin: 0;
+}
