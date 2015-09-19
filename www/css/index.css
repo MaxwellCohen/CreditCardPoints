@@ -1,17 +1,78 @@
-#submit {
-    width: 100%;
-    background: blue;
-    color: white;
-    text-align: center;
-}
-input{
-    font-size: 2em;
+ html,
+ body {
+     width:100%;
+     height: 100%;
+     margin: 0;
+     padding: 0;
+     overflow: hidden;
+ }
+ #wrapper {
+    width:100%;
+    height:100%;
+    position:relative;
 }
 
-ul{
-    list-style-type: none;
-    padding-left:0;
-    padding-right:0;
-    margin-left: 0;
-    margin-right:0;
-}
+ #map {
+    position:absolute;
+     top: 100px;
+     left: 0px;
+     width: 100%;
+     bottom:0px;
+ }
+ 
+ 
+ #form {
+     position: absolute;
+     width: 100%;
+     height: 100px;
+     left: 0px;
+     top: 0px;
+     z-index: 5;
+     background-color: #fff;
+ }
+ 
+ #autocomplete {
+     width: 100%;
+ }
+ 
+ #listOfCatagories {
+     float: left;
+     width: auto;
+     padding-right: 20px;
+     top: 25px;
+     height: 75px;
+     overflow-x: hidden;
+     overflow-y: auto;
+     white-space: nowrap;
+ }
+ 
+ ul {
+     list-style-type: none;
+     padding: 0 0 0 0;
+     margin: 0 0 0 0;
+     white-space: nowrap;
+ }
+ 
+ #buttonPanel {
+     float: left;
+ }
+ 
+ #listing {
+     top: 25px;
+     height: 75px;
+     cursor: pointer;
+     overflow-x: hidden;
+     overflow-y: auto;
+     /*white-space: nowrap;*/
+ }
+ 
+ #resultsTable {
+     border-collapse: collapse;
+     width: 100%;
+ }
+ 
+ .button {
+     height: 75px;
+     text-align: center;
+     vertical-align: middle;
+     }
